@@ -3,8 +3,8 @@ import sqlite3
 from bs4 import BeautifulSoup
 import requests
 
-# 1. Connect to SQLite database (creates 'metrics.db' if it doesn't exist)
-conn = sqlite3.connect("metrics.db")
+# 1. Connect to SQLite database (creates 'scrapeape.db' if it doesn't exist)
+conn = sqlite3.connect("scrapeape.db")
 cursor = conn.cursor()
 
 # Create a table for our metrics
