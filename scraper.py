@@ -1,40 +1,41 @@
 from datetime import datetime
-import sqlite3
+import socket
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import requests
 
-# 1. Connect to SQLite database (creates 'scrapeape.db' if it doesn't exist)
-conn = sqlite3.connect("scrapeape.db")
-cursor = conn.cursor()
+# Import custom functions
+from database import DB_INIT, DB_SAVE
 
-# Create a table for our metrics
-cursor.execute(
-    """
-    CREATE TABLE IF NOT EXISTS page_metrics (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp TEXT,
-        title TEXT
-    )
-"""
-)
+# Ensure database and table exist before running
+DB_INIT()
 
-# 2. Fetch the web page
 url = "https://example.com"
-response = requests.get(url, timeout=10)
+headers = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    )
+}
 
-if response.status_code == 200:
-  # 3. Parse the HTML
-  soup = BeautifulSoup(response.text, "html.parser")
-  page_title = soup.find("h1").get_text(strip=True)
-  current_time = datetime.now().isoformat()
+try:
+  domain = urlparse(url).netloc
+  target_ip = socket.gethostbyname(domain)
 
-  # 4. Insert metrics into the database
-  cursor.execute(
-      "INSERT INTO page_metrics (timestamp, title) VALUES (?, ?)",
-      (current_time, page_title),
-  )
-  conn.commit()
-  print(f"Saved metric at {current_time}: {page_title}")
+  response = requests.get(url, headers=headers, timeout=10)
 
-# Close the database connection
-conn.close()
+  if response.status_code == 200:
+    soup = BeautifulSoup(response.text, "html.parser")
+    title_element = soup.find("title")
+    page_title = title_element.get_text(strip=True) if title_element else "N/A"
+    current_time = datetime.now().isoformat()
+
+    # Call the clean subroutine/function from database.py
+    DB_SAVE(current_time, page_title, url, target_ip)
+
+    print(f"Saved successfully!")
+  else:
+    print(f"Error: Status Code: {response.status_code}")
+
+except Exception as e:
+  print(f"An error occurred: {e}")
+
