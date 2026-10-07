@@ -1,14 +1,14 @@
-from datetime import datetime
+from bs4 import BeautifulSoup
+
 import socket
 from urllib.parse import urlparse
-from bs4 import BeautifulSoup
+
 import requests
 
 # Import custom functions
-from database import DB_INIT, DB_SAVE
+from database import DB_SAVE
 
-# Ensure database and table exist before running
-DB_INIT()
+
 
 url = "https://example.com"
 headers = {
@@ -26,11 +26,10 @@ try:
   if response.status_code == 200:
     soup = BeautifulSoup(response.text, "html.parser")
     title_element = soup.find("title")
-    page_title = title_element.get_text(strip=True) if title_element else "N/A"
-    current_time = datetime.now().isoformat()
+    page_title = title_element.get_text(strip=True) if title_element else "N/A"   
 
     # Call the clean subroutine/function from database.py
-    DB_SAVE(current_time, page_title, url, target_ip)
+    DB_SAVE(page_title, url)
 
     print(f"Saved successfully!")
   else:
