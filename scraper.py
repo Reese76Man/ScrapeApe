@@ -1,16 +1,15 @@
+# scraper.py
 from bs4 import BeautifulSoup
 import requests
 
 
-def parse_page_element(url, css_selector):
+def SC_PARSER(url, css_selector, header_value):
   """Visits a target URL and parses out content using a given CSS selector rule.
 
   Returns: (page_title, scraped_text)
   """
   headers = {
-      "User-Agent": (
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      )
+      "User-Agent": header_value
   }
 
   try:
